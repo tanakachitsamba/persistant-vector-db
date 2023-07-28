@@ -1,4 +1,5 @@
 #Todo
 
-1. deploy the db to a server 
-2. create an api for the service with fastapi 
+1. serialise the results to json
+2. seperate different functions into individual scripts 
+3. integrate it to the existing llm engine
