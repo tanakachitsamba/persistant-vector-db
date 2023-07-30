@@ -48,7 +48,7 @@ if __name__ == "__main__":
         ids = sys.argv[3]
 
         # Create a new Chroma client with persistence enabled.
-        persist_directory = "db"
+        persist_directory = "db" # this path for the db could be an arg 
         client = chromadb.PersistentClient(path=persist_directory)
 
         # Load the OpenAI key
