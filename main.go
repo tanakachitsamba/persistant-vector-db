@@ -77,7 +77,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	if stderr.Len() > 0 {
-		fmt.Fprint(os.Stderr, stderr.String())
-	}
+	// Removed duplicated printing of stderr; already printed in error block above.
 }
