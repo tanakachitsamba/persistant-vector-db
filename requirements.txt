@@ -1,0 +1,4 @@
+chromadb
+behave
+python-dotenv
+openai
