@@ -1,70 +1,120 @@
+import json
 import os
-import sys
-import chromadb
-from chromadb.utils import embedding_functions
-from dotenv import load_dotenv
 
-# Load variables from .env file into environment
-load_dotenv()
+from behave import given, when, then
 
-# Define shared context
+from add_documents import (
+    IngestionError,
+    create_openai_ef,
+    create_or_get_collection,
+    get_persistent_client,
+    ingest_documents,
+    load_openai_key,
+    parse_ingestion_payload,
+)
+
+
+# Hooks
+
 def before_scenario(context, scenario):
-    context.documents = None
-    context.metadatas = None
-    context.ids = None
+    context.error = None
+    context.result = None
+    context.documents = []
+    context.metadatas = []
+    context.ids = []
+    context.openai_collection = None
+
 
 def after_scenario(context, scenario):
-    if context.documents:
-        # Clean up the collection after the test
+    if getattr(context, "openai_collection", None) and context.result:
         context.openai_collection.remove(ids=context.ids)
 
+
 # Step Definitions
+
+
 @given("the OpenAI key is set in the .env file")
-def step_impl_load_openai_key(context):
-    openai_key = os.environ.get('OPENAI_KEY')
-    if not openai_key:
-        raise ValueError("OPENAI_KEY is not set in the .env file.")
-    context.openai_key = openai_key
+def step_impl_openai_key_present(context):
+    os.environ.setdefault("OPENAI_KEY", "test-key")
+    context.openai_key = load_openai_key()
+
+
+@given("the OpenAI key is not set in the environment")
+def step_impl_openai_key_missing(context):
+    os.environ.pop("OPENAI_KEY", None)
+
 
 @given("an OpenAI Embedding Function is created")
 def step_impl_create_openai_ef(context):
-    context.openai_ef = embedding_functions.OpenAIEmbeddingFunction(
-        api_key=context.openai_key,
-        model_name="text-embedding-ada-002"
-    )
+    context.openai_ef = create_openai_ef(api_key=context.openai_key)
+
 
 @given("a Chroma client with persistence enabled is available")
 def step_impl_create_chroma_client(context):
     context.persist_directory = "db"
-    context.client = chromadb.PersistentClient(path=context.persist_directory)
+    context.client = get_persistent_client(persist_directory=context.persist_directory)
+    context.openai_collection = create_or_get_collection(context.client)
 
-@when("documents, metadatas, and ids are provided")
-def step_impl_provide_arguments(context):
-    # Check if three command-line arguments are provided
-    if len(sys.argv) != 4:
-        raise ValueError("Usage: python script.py <documents> <metadatas> <ids>")
 
-    # Extract the command-line arguments as strings
-    context.documents = sys.argv[1]
-    context.metadatas = sys.argv[2]
-    context.ids = sys.argv[3]
-
-    # Create or get the Chroma collection
-    context.openai_collection = context.client.get_or_create_collection(name="lake")
-
-    # Add documents to the collection
+@when("I load the OpenAI key")
+def step_impl_load_openai_key(context):
     try:
-        context.openai_collection.add(
-            documents=context.documents.split(","),
-            metadatas=context.metadatas.split(","),
-            ids=context.ids.split(",")
+        context.openai_key = load_openai_key()
+    except Exception as exc:  # pragma: no cover - behave captures the exception
+        context.error = exc
+
+
+@when("the following documents are ingested")
+def step_impl_ingest_documents(context):
+    documents, metadatas, ids = [], [], []
+    for row in context.table:
+        documents.append(row["document"])
+        try:
+            metadata = json.loads(row["metadata"]) if row["metadata"] else {}
+        except json.JSONDecodeError:
+            context.error = IngestionError("Invalid metadata JSON provided.")
+            return
+        metadatas.append(metadata)
+        ids.append(row["id"])
+
+    context.documents = documents
+    context.metadatas = metadatas
+    context.ids = ids
+
+    try:
+        context.result = ingest_documents(
+            context.openai_collection, documents, metadatas, ids
         )
-    except Exception as e:
-        context.error = e
+    except Exception as exc:  # pragma: no cover - behave captures the exception
+        context.error = exc
+
+
+@when("the payload is ingested")
+def step_impl_ingest_payload(context):
+    try:
+        documents, metadatas, ids = parse_ingestion_payload(context.text)
+        context.documents = documents
+        context.metadatas = metadatas
+        context.ids = ids
+        context.result = ingest_documents(
+            context.openai_collection, documents, metadatas, ids
+        )
+    except Exception as exc:  # pragma: no cover - behave captures the exception
+        context.error = exc
+
 
 @then("the documents should be added to the collection successfully")
 def step_impl_verify_success(context):
     assert context.error is None, f"Error occurred while adding documents: {context.error}"
-    assert len(context.openai_collection) == len(context.documents.split(",")), "Number of documents added is incorrect."
+    assert context.result == len(context.documents)
 
-    # Additional assertions if required
+
+@then('an error should be raised containing "{message}"')
+def step_impl_verify_error_message(context, message):
+    assert context.error is not None, "Expected an error but none was raised."
+    assert message in str(context.error)
+
+
+@then("an ingestion error should be raised")
+def step_impl_verify_ingestion_error(context):
+    assert isinstance(context.error, IngestionError)
