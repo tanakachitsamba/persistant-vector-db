@@ -78,8 +78,12 @@ def validate_payload(documents: Any, metadatas: Any, ids: Any) -> None:
 
     if not isinstance(documents, list):
         raise ValueError("`documents` must be a JSON array of strings.")
+    if not all(isinstance(doc, str) for doc in documents):
+        raise ValueError("Each document must be a string in the `documents` array.")
     if not isinstance(ids, list):
         raise ValueError("`ids` must be a JSON array of strings.")
+    if not all(isinstance(id_, str) for id_ in ids):
+        raise ValueError("Each id must be a string in the `ids` array.")
     if not isinstance(metadatas, list):
         raise ValueError("`metadatas` must be a JSON array of objects.")
     if not all(isinstance(item, dict) for item in metadatas):
