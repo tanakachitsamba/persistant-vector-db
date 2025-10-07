@@ -4,7 +4,7 @@ import argparse
 import json
 import os
 import sys
-from typing import Any, Sequence
+from typing import Any
 
 import chromadb
 from chromadb.utils import embedding_functions
@@ -35,9 +35,9 @@ def create_openai_ef(api_key: str) -> embedding_functions.OpenAIEmbeddingFunctio
     )
     return openai_ef
 
-def create_or_get_collection(client: chromadb.ClientAPI,
-                             embedding_function: embedding_functions.OpenAIEmbeddingFunction
-                             ) -> chromadb.api.models.Collection.Collection:
+def create_or_get_collection(client: "chromadb.ClientAPI",
+                             embedding_function: "embedding_functions.OpenAIEmbeddingFunction"
+                             ) -> "chromadb.api.models.Collection.Collection":
     """Return the ``lake`` collection configured with the supplied embedding function."""
 
     # Create a new chroma collection that uses the OpenAI embedding function.
@@ -91,7 +91,12 @@ def validate_payload(documents: Any, metadatas: Any, ids: Any) -> None:
             "`documents`, `metadatas`, and `ids` must contain the same number of entries."
         )
 
-def add_to_openai_collection(collection, documents, metadatas, ids):
+def add_to_openai_collection(
+    collection: "chromadb.api.models.Collection.Collection",
+    documents: list[str],
+    metadatas: list[dict[str, Any]],
+    ids: list[str],
+) -> None:
     """Insert the provided payload into ``collection`` and report basic failures."""
 
     try:
