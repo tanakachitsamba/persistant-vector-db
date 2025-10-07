@@ -19,7 +19,7 @@ func main() {
 
 	documents := []string{
 		"Tomatoes, onions, baby potatoes, cabbage, cabbage leaves",
-		"jolof rice",
+		"jollof rice",
 	}
 	metadatas := []map[string]string{
 		{"topic": "ingredients_list"},
