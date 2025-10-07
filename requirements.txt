@@ -1,0 +1,5 @@
+behave
+chromadb
+python-dotenv
+coverage
+pytest
