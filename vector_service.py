@@ -1,7 +1,7 @@
 """Utilities for interacting with the local Chroma vector database.
 
 This module centralises the creation of the persistent client, collection
-initialisation and the high level operations that a consumer of the vector
+initialization and the high level operations that a consumer of the vector
 store will typically perform.  The functions can be imported and reused from
 other modules or triggered through the module's command line interface via
 ``python -m vector_service``.
