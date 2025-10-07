@@ -3,8 +3,6 @@ import sys
 
 import pytest
 
-sys.path.append(str(pathlib.Path(__file__).resolve().parents[1]))
-
 from add_documents import IngestionError, ingest_documents, parse_ingestion_payload
 
 
