@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -15,24 +17,65 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Prepare the command to execute the Python script
-	cmd := exec.Command("python3", "script.py", `["Tomatoes, onions, baby potatoes, cabbage, cabbage leaves", "jolof rice"]`, `[{"topic": "ingredients_list"}, {"topic": "favourite_recipes"}]`, `["id1", "id2"]`)
+	documents := []string{
+		"Tomatoes, onions, baby potatoes, cabbage, cabbage leaves",
+		"jollof rice",
+	}
+	metadatas := []map[string]string{
+		{"topic": "ingredients_list"},
+		{"topic": "favourite_recipes"},
+	}
+	ids := []string{"id1", "id2"}
 
-	// Set the working directory if needed (optional)
-	// cmd.Dir = "/path/to/python_script_directory"
-
-	// Redirect the standard output and standard error to capture the output
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	// Run the Python script and check for errors
-	err := cmd.Run()
+	documentsJSON, err := json.Marshal(documents)
 	if err != nil {
-		fmt.Println("Error executing Python script:", err)
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			// The command completed with a non-zero exit code
-			fmt.Printf("Exit code: %d\n", exitErr.ExitCode())
-		}
+		fmt.Fprintf(os.Stderr, "failed to encode documents payload: %v\n", err)
 		os.Exit(1)
 	}
+
+	metadatasJSON, err := json.Marshal(metadatas)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to encode metadatas payload: %v\n", err)
+		os.Exit(1)
+	}
+
+	idsJSON, err := json.Marshal(ids)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to encode ids payload: %v\n", err)
+		os.Exit(1)
+	}
+
+	cmd := exec.Command(
+		"python3",
+		"add_documents.py",
+		"--documents", string(documentsJSON),
+		"--metadatas", string(metadatasJSON),
+		"--ids", string(idsJSON),
+	)
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err = cmd.Run()
+
+	if stdout.Len() > 0 {
+		fmt.Print(stdout.String())
+	}
+
+	if err != nil {
+		if stderr.Len() > 0 {
+			fmt.Fprint(os.Stderr, stderr.String())
+		}
+
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			os.Exit(exitErr.ExitCode())
+		}
+
+		fmt.Fprintf(os.Stderr, "failed to execute python command: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Removed duplicated printing of stderr; already printed in error block above.
 }

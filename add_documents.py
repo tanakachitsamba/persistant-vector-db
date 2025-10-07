@@ -1,8 +1,11 @@
+import argparse
+import json
+import os
+import sys
+
 import chromadb
 from chromadb.utils import embedding_functions
 from dotenv import load_dotenv
-import os
-import sys
 
 def load_openai_key():
     # Load variables from .env file into environment
@@ -36,19 +39,33 @@ def add_to_openai_collection(collection, documents, metadatas, ids):
     except Exception as e:
         print(f"Error occurred while adding documents: {e}")
 
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+        description="Add documents to the persistent Chroma collection."
+    )
+    parser.add_argument("--documents", required=True, help="JSON encoded list of documents")
+    parser.add_argument("--metadatas", required=True, help="JSON encoded list of metadatas")
+    parser.add_argument("--ids", required=True, help="JSON encoded list of ids")
+    return parser.parse_args()
+
+
+def load_json_argument(value, argument_name):
+    try:
+        return json.loads(value)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid JSON provided for {argument_name}: {exc}") from exc
+
+
 if __name__ == "__main__":
     try:
-        # Check if three command-line arguments are provided
-        if len(sys.argv) != 4:
-            raise ValueError("Usage: python script.py <documents> <metadatas> <ids>")
+        args = parse_arguments()
 
-        # Extract the command-line arguments as strings
-        documents = sys.argv[1]
-        metadatas = sys.argv[2]
-        ids = sys.argv[3]
+        documents = load_json_argument(args.documents, "--documents")
+        metadatas = load_json_argument(args.metadatas, "--metadatas")
+        ids = load_json_argument(args.ids, "--ids")
 
         # Create a new Chroma client with persistence enabled.
-        persist_directory = "db" # this path for the db could be an arg 
+        persist_directory = "db"  # this path for the db could be an arg
         client = chromadb.PersistentClient(path=persist_directory)
 
         # Load the OpenAI key
@@ -63,8 +80,11 @@ if __name__ == "__main__":
         # Call the function with the provided arguments
         add_to_openai_collection(openai_collection, documents, metadatas, ids)
     except ValueError as ve:
-        print(ve)
+        print(ve, file=sys.stderr)
+        sys.exit(1)
     except chromadb.ChromaDBError as cde:
-        print(f"ChromaDBError: {cde}")
+        print(f"ChromaDBError: {cde}", file=sys.stderr)
+        sys.exit(1)
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+        print(f"An unexpected error occurred: {e}", file=sys.stderr)
+        sys.exit(1)
