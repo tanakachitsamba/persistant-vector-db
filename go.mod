@@ -1,3 +1,3 @@
-module persistant-vector-db
+module persistent-vector-db
 
 go 1.19
