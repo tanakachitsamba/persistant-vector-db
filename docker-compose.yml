@@ -1,7 +1,7 @@
 services:
   app:
     build: .
-    image: persistant-vector-db:latest
+    image: persistent-vector-db:latest
     env_file:
       - .env
     environment:
