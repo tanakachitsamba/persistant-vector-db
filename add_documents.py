@@ -37,7 +37,7 @@ def create_openai_ef(api_key: str) -> embedding_functions.OpenAIEmbeddingFunctio
 
 def create_or_get_collection(client: chromadb.ClientAPI,
                              embedding_function: embedding_functions.OpenAIEmbeddingFunction
-                             ) -> chromadb.api.models.Collection.Collection:
+                             ) -> chromadb.Collection:
     """Return the ``lake`` collection configured with the supplied embedding function."""
 
     # Create a new chroma collection that uses the OpenAI embedding function.
