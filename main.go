@@ -12,7 +12,7 @@ const (
 )
 
 var (
-	defaultItemsArg  = `["Tomatoes, onions, baby potatoes, cabbage, cabbage leaves", "jolof rice"]`
+	defaultItemsArg  = `["Tomatoes, onions, baby potatoes, cabbage, cabbage leaves", "jollof rice"]`
 	defaultTopicsArg = `[{"topic": "ingredients_list"}, {"topic": "favourite_recipes"}]`
 	defaultIDsArg    = `["id1", "id2"]`
 )
