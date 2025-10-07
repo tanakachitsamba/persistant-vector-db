@@ -285,7 +285,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 0
 
     parser.error("No command provided")
-    return 1
 
 
 if __name__ == "__main__":  # pragma: no cover - CLI entry point
