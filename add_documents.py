@@ -85,7 +85,7 @@ def validate_payload(documents: Any, metadatas: Any, ids: Any) -> None:
     if not all(isinstance(item, dict) for item in metadatas):
         raise ValueError("Each metadata entry must be a JSON object (dictionary).")
 
-    lengths: Sequence[int] = [len(documents), len(metadatas), len(ids)]
+    lengths: list[int] = [len(documents), len(metadatas), len(ids)]
     if len(set(lengths)) != 1:
         raise ValueError(
             "`documents`, `metadatas`, and `ids` must contain the same number of entries."
