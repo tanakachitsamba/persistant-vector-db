@@ -13,9 +13,9 @@ Environment variables control the behaviour of the service:
 ``VECTOR_COLLECTION_NAME``
     Name of the collection that operations target (defaults to ``lake``).
 ``VECTOR_EMBEDDING_BACKEND``
-    Embedding backend to use.  ``openai`` requires ``OPENAI_KEY`` to be
+    Embedding backend to use (defaults to ``openai``). ``openai`` requires ``OPENAI_KEY`` to be
     defined, while ``simple`` uses an inexpensive hashing based embedding that
-    works well for development and tests.
+    works well for development and tests. If an invalid value is provided, an error will be raised.
 """
 
 from __future__ import annotations
