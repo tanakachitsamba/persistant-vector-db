@@ -1,0 +1,13 @@
+services:
+  app:
+    build: .
+    image: persistant-vector-db:latest
+    env_file:
+      - .env
+    environment:
+      - OPENAI_KEY=${OPENAI_KEY}
+    volumes:
+      - chroma_data:/app/db
+    restart: unless-stopped
+volumes:
+  chroma_data:
