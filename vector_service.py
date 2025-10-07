@@ -267,7 +267,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if len(metadatas) == 0:
             metadatas = [{} for _ in documents]
         elif len(metadatas) == 1 and len(documents) > 1:
-            metadatas *= len(documents)
+            metadatas = [metadatas[0].copy() for _ in documents]
         if not (len(documents) == len(ids) == len(metadatas)):
             raise ValueError("Each document must have a matching id and metadata entry")
         add_documents(documents, metadatas, ids, config=config)
