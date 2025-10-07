@@ -40,7 +40,7 @@ if __name__ == "__main__":
     try:
         # Check if three command-line arguments are provided
         if len(sys.argv) != 4:
-            raise ValueError("Usage: python script.py <documents> <metadatas> <ids>")
+            raise ValueError("Usage: python add_documents.py <documents> <metadatas> <ids>")
 
         # Extract the command-line arguments as strings
         documents = sys.argv[1]

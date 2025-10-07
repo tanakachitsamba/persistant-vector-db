@@ -16,7 +16,13 @@ func main() {
 	}
 
 	// Prepare the command to execute the Python script
-	cmd := exec.Command("python3", "script.py", `["Tomatoes, onions, baby potatoes, cabbage, cabbage leaves", "jolof rice"]`, `[{"topic": "ingredients_list"}, {"topic": "favourite_recipes"}]`, `["id1", "id2"]`)
+	cmd := exec.Command(
+		"python3",
+		"add_documents.py",
+		"[\"Tomatoes, onions, baby potatoes, cabbage, cabbage leaves\", \"jolof rice\"]",
+		"[{\"topic\": \"ingredients_list\"}, {\"topic\": \"favourite_recipes\"}]",
+		"[\"id1\", \"id2\"]",
+	)
 
 	// Set the working directory if needed (optional)
 	// cmd.Dir = "/path/to/python_script_directory"

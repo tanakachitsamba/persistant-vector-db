@@ -1,4 +1,4 @@
-# Persistant Vector DB
+# Persistent Vector DB
 
 ## Local development
 
@@ -19,7 +19,7 @@ The repository includes a multi-stage Docker build that compiles the Go launcher
 ### Build the image
 
 ```bash
-docker build -t persistant-vector-db .
+docker build -t persistent-vector-db .
 ```
 
 ### Run with Docker Compose
